@@ -1,8 +1,14 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
 -- Configuration
+local delay = 1 -- Delay in seconds
+local raycastdistance = 100 -- Raycast distance
+local ignore_unanchor_raycast = true -- Set to true to ignore unanchored parts in raycast, false to include them
+local smooth = true -- Set to true to use tweens for smooth movement, false for direct movement
+local response_time = 1 -- Time for tween in seconds (response time)
 
 -- Create the tool
 local tool = Instance.new("Tool")
@@ -35,7 +41,7 @@ end
 
 -- Function to teleport unanchored parts to the sphere
 local function teleportPartsToSphere(localPlayer)
-    local distanceThreshold = 100 -- Adjust this threshold for performance
+    local distanceThreshold = 50 -- Adjust this threshold for performance
     for _, part in pairs(workspace:GetDescendants()) do
         if CheckPart(part, localPlayer) and (part.Position - sphere.Position).Magnitude < distanceThreshold then
             -- Destroy any existing forces on the part
@@ -69,6 +75,20 @@ local function releaseForces()
     table.clear(Forces)
 end
 
+-- Tween the sphere's movement to the new position
+local function tweenSpherePosition(newPosition)
+    if smooth then
+        -- Create a tween for smooth movement
+        local tweenInfo = TweenInfo.new(response_time, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+        local goal = {Position = newPosition}
+        local tween = TweenService:Create(sphere, tweenInfo, goal)
+        tween:Play()
+    else
+        -- Directly set the position if no smooth movement is required
+        sphere.Position = newPosition
+    end
+end
+
 -- Update sphere position based on raycast
 local function updateSphere(localPlayer)
     local mousePosition = UserInputService:GetMouseLocation()
@@ -76,19 +96,36 @@ local function updateSphere(localPlayer)
     local ray = camera:ViewportPointToRay(mousePosition.X, mousePosition.Y)
 
     local rayOrigin = ray.Origin
-    local rayDirection = ray.Direction * 500 -- Adjust raycast distance as needed (500 for example)
+    local rayDirection = ray.Direction * raycastdistance -- Use the raycastdistance
     local raycastParams = RaycastParams.new()
     raycastParams.FilterDescendantsInstances = {sphere, localPlayer.Character, workspace.CurrentCamera} -- Ignore sphere, player character, and camera
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 
+    -- If ignore_unanchor_raycast is true, we add unanchored parts to the blacklist (so they're ignored by the raycast)
+    if ignore_unanchor_raycast then
+        local unanchoredParts = {}
+        -- Collect all unanchored parts in the workspace
+        for _, part in pairs(workspace:GetDescendants()) do
+            if part:IsA("BasePart") and not part.Anchored then
+                table.insert(unanchoredParts, part)
+            end
+        end
+        -- Add unanchored parts to the filter
+        table.insert(raycastParams.FilterDescendantsInstances, unanchoredParts)
+    end
+
     -- Cast the ray and check if it hits any part
     local result = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
 
+    local newPosition
     if result then
-        sphere.Position = result.Position
+        newPosition = result.Position
     else
-        sphere.Position = rayOrigin + rayDirection
+        newPosition = rayOrigin + rayDirection
     end
+
+    -- Tween the sphere to the new position
+    tweenSpherePosition(newPosition)
 
     -- Teleport parts to the sphere's position
     teleportPartsToSphere(localPlayer)
@@ -112,6 +149,7 @@ tool.Activated:Connect(function()
                 return
             end
             updateSphere(localPlayer)
+            wait(delay) -- Wait for the defined delay before updating again
         end)
     else
         -- If deactivated, hide the sphere and clear forces immediately
