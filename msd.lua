@@ -2,15 +2,14 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
-local SETTINGS = {
-    Distance = 100 -- Default distance for non-PC devices
-}
+-- Configuration
 
-local frozenParts = {}
-local Forces = {}
-local raycastDistance = SETTINGS.Distance -- Adjustable ray distance
+-- Create the tool
+local tool = Instance.new("Tool")
+tool.Name = "TeleportTool"
+tool.RequiresHandle = false -- No need for a physical handle
+tool.Parent = nil -- Start unparented until assigned to the Backpack
 
--- Create a small sphere dynamically
 local sphere = Instance.new("Part")
 sphere.Shape = Enum.PartType.Ball
 sphere.Size = Vector3.new(0.5, 0.5, 0.5) -- Small sphere
@@ -19,12 +18,18 @@ sphere.CanCollide = false
 sphere.Material = Enum.Material.Neon
 sphere.BrickColor = BrickColor.new("Bright red")
 sphere.Parent = workspace
+sphere.Transparency = 1 -- Hidden until the tool is activated
+
+local frozenParts = {}
+local Forces = {}
+
+local isActive = false -- To track if the tool is active
 
 -- Function to check if a part is valid for teleportation
 local function CheckPart(part, localPlayer)
     return part:IsA("BasePart") 
         and not part.Anchored 
-        and not part:IsDescendantOf(localPlayer.Character)
+        and not part:IsDescendantOf(localPlayer.Character) 
         and part.Name ~= "Sphere"
 end
 
@@ -70,7 +75,7 @@ local function updateSphere(localPlayer)
     local ray = camera:ViewportPointToRay(mousePosition.X, mousePosition.Y)
 
     local rayOrigin = ray.Origin
-    local rayDirection = ray.Direction * raycastDistance -- Dynamic ray distance
+    local rayDirection = ray.Direction
     local raycastParams = RaycastParams.new()
     raycastParams.FilterDescendantsInstances = {sphere, localPlayer.Character} -- Ignore sphere and player character
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
@@ -87,21 +92,43 @@ local function updateSphere(localPlayer)
     teleportPartsToSphere(localPlayer)
 end
 
--- Adjust ray distance using scroll wheel (for PC users)
-local function adjustDistance(input)
-    if input.UserInputType == Enum.UserInputType.MouseWheel then
-        raycastDistance = math.clamp(raycastDistance + input.Position.Z * 5, 10, 1000)
-    end
-end
+-- Tool Activation Logic
+tool.Activated:Connect(function()
+    local localPlayer = Players.LocalPlayer
+    isActive = not isActive -- Toggle the active state
 
--- Connect the sphere updater and input listener
-local localPlayer = Players.LocalPlayer
-RunService.RenderStepped:Connect(function()
-    updateSphere(localPlayer)
+    if isActive then
+        sphere.Transparency = 0 -- Make the sphere visible
+
+        -- Start the loop when activated
+        local connection
+        connection = RunService.Heartbeat:Connect(function()
+            if not isActive or not tool.Parent then -- Stop loop if not active or tool is unequipped
+                connection:Disconnect()
+                sphere.Transparency = 1 -- Hide the sphere
+                releaseForces()
+                return
+            end
+            updateSphere(localPlayer)
+        end)
+    else
+        -- If deactivated, hide the sphere and clear forces immediately
+        sphere.Transparency = 1
+        releaseForces()
+    end
 end)
 
-UserInputService.InputChanged:Connect(function(input)
-    if UserInputService.MouseEnabled then -- Only allow scroll wheel adjustment on PC
-        adjustDistance(input)
+-- Cleanup when the tool is deactivated or unequipped
+tool.Unequipped:Connect(function()
+    sphere.Transparency = 1 -- Hide the sphere
+    releaseForces()
+end)
+
+-- Add the tool to the Backpack when the game starts
+local localPlayer = Players.LocalPlayer
+localPlayer.CharacterAdded:Connect(function()
+    if not localPlayer:FindFirstChild("Backpack") then
+        localPlayer:WaitForChild("Backpack")
     end
+    tool.Parent = localPlayer.Backpack
 end)
