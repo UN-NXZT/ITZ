@@ -6,7 +6,7 @@ local UserInputService = game:GetService("UserInputService")
 
 -- Create the tool
 local tool = Instance.new("Tool")
-tool.Name = "TeleportTool"
+tool.Name = "BringTool"
 tool.RequiresHandle = false -- No need for a physical handle
 tool.Parent = nil -- Start unparented until assigned to the Backpack
 
