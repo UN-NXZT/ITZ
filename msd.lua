@@ -35,8 +35,9 @@ end
 
 -- Function to teleport unanchored parts to the sphere
 local function teleportPartsToSphere(localPlayer)
+    local distanceThreshold = 100 -- Adjust this threshold for performance
     for _, part in pairs(workspace:GetDescendants()) do
-        if CheckPart(part, localPlayer) then
+        if CheckPart(part, localPlayer) and (part.Position - sphere.Position).Magnitude < distanceThreshold then
             -- Destroy any existing forces on the part
             for _, c in pairs(part:GetChildren()) do
                 if c:IsA("BodyPosition") or c:IsA("BodyGyro") then
@@ -75,11 +76,12 @@ local function updateSphere(localPlayer)
     local ray = camera:ViewportPointToRay(mousePosition.X, mousePosition.Y)
 
     local rayOrigin = ray.Origin
-    local rayDirection = ray.Direction
+    local rayDirection = ray.Direction * 500 -- Adjust raycast distance as needed (500 for example)
     local raycastParams = RaycastParams.new()
-    raycastParams.FilterDescendantsInstances = {sphere, localPlayer.Character} -- Ignore sphere and player character
+    raycastParams.FilterDescendantsInstances = {sphere, localPlayer.Character, workspace.CurrentCamera} -- Ignore sphere, player character, and camera
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 
+    -- Cast the ray and check if it hits any part
     local result = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
 
     if result then
@@ -88,7 +90,7 @@ local function updateSphere(localPlayer)
         sphere.Position = rayOrigin + rayDirection
     end
 
-    -- Continuously teleport parts to the sphere's position
+    -- Teleport parts to the sphere's position
     teleportPartsToSphere(localPlayer)
 end
 
