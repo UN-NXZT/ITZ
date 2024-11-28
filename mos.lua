@@ -2,46 +2,13 @@ local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
 
 local tool = Instance.new("Tool")
-tool.Name = "BlackHole V2" -- Set the tool's name to "blackhole"
+tool.Name = "BlackHole V3" -- Set the tool's name to "blackhole"
 tool.RequiresHandle = false -- No handle needed
 tool.Parent = player.Backpack -- Parent the tool to the player's backpack
 
 local frozenParts = {}
 local Forces = {}
 local redBall = nil -- Variable to store the red ball
-local nocolide = {} -- Table to store parts that should not collide with the player
-
--- Function to create an unanchored part that doesn't collide with the player
-function createNoCollidePart(position)
-    local part = Instance.new("Part")
-    part.Size = Vector3.new(5, 5, 5) -- Size of the part
-    part.Position = position
-    part.Anchored = false -- Unanchor the part
-    part.CanCollide = true -- Initially set to collide with everything
-    part.Material = Enum.Material.SmoothPlastic
-    part.Color = Color3.fromRGB(255, 0, 0) -- Red color to distinguish
-    part.Parent = workspace
-
-    -- Add part to the no-collide list
-    table.insert(nocolide, part)
-
-    -- Create a collision group to ignore collisions with the player
-    local collisionGroupName = "NoPlayerCollision"
-    local PhysicsService = game:GetService("PhysicsService")
-    
-    -- Check if the collision group exists, if not, create it
-    if not pcall(function() PhysicsService:GetCollisionGroupId(collisionGroupName) end) then
-        PhysicsService:CreateCollisionGroup(collisionGroupName)
-    end
-
-    -- Set the part's collision group to the one we created
-    PhysicsService:SetPartCollisionGroup(part, collisionGroupName)
-
-    -- Set up the collision group to not collide with the player
-    PhysicsService:CollisionGroupSetCollidable(collisionGroupName, "Player", false)
-
-    return part
-end
 
 -- Function to check if a part is valid for teleportation
 local function CheckPart(part, localPlayer)
@@ -118,23 +85,12 @@ tool.Activated:Connect(function()
             end
         end)
     end
-
-    -- Create a no-collide part where the ray hits
-    if result then
-        createNoCollidePart(result.Position)
-    end
 end)
 
--- When the tool is unequipped, remove the red ball and no-collide parts
+-- When the tool is unequipped, remove the red ball
 tool.Unequipped:Connect(function()
     if redBall then
         redBall:Destroy()
         redBall = nil -- Reset the redBall variable
     end
-
-    -- Destroy all no-collide parts
-    for _, part in pairs(nocolide) do
-        part:Destroy()
-    end
-    nocolide = {} -- Clear the list of no-collide parts
 end)
