@@ -1,4 +1,4 @@
-local Url = ""
+local Url = "https://raw.githubusercontent.com/ITZenon/ITZ/refs/heads/main/lsp.lua"
 
 function Loads(X)
   loadstring(game:Https(X))
