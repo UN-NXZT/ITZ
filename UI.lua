@@ -1,28 +1,41 @@
-local Flux = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/fluxlib.txt")()
+local lib = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/Vape.txt")()
 
-local win = Flux:Window("PREVIEW", "Baseplate", Color3.fromRGB(255, 110, 48), Enum.KeyCode.LeftControl)
-local tab = win:Tab("Tab 1", "http://www.roblox.com/asset/?id=6023426915")
-tab:Button("Kill all", "This function may not work sometimes and you can get banned.", function()
-Flux:Notification("Killed all players successfully!", "Alright")
+local win = lib:Window("PREVIEW",Color3.fromRGB(44, 120, 224), Enum.KeyCode.RightControl)
+
+local tab = win:Tab("Tab 1")
+
+tab:Button("Button", function()
+lib:Notification("Notification", "Hello!", "Hi!")
 end)
-tab:Label("This is just a label.")
-tab:Line()
-tab:Toggle("Auto-Farm Coins", "Automatically collects coins for you!", function(t)
+
+tab:Toggle("Toggle",false, function(t)
 print(t)
 end)
-tab:Slider("Walkspeed", "Makes your faster.", 0, 100,16,function(t)
+
+tab:Slider("Slider",0,100,30, function(t)
 print(t)
 end)
-tab:Dropdown("Part to aim at", {"Torso","Head","Penis"}, function(t)
+
+tab:Dropdown("Dropdown",{"Option 1","Option 2","Option 3","Option 4","Option 5"}, function(t)
 print(t)
 end)
-tab:Colorpicker("ESP Color", Color3.fromRGB(255,1,1), function(t)
+
+tab:Colorpicker("Colorpicker",Color3.fromRGB(255,0,0), function(t)
 print(t)
 end)
-tab:Textbox("Gun Power", "This textbox changes your gun power, so you can kill everyone faster and easier.", true, function(t)
+
+tab:Textbox("Textbox",true, function(t)
 print(t)
 end)
-tab:Bind("Kill Bind", Enum.KeyCode.Q, function()
-print("Killed a random person!")
+
+tab:Bind("Bind",Enum.KeyCode.RightShift, function()
+print("Pressed!")
 end)
-win:Tab("Tab 2", "http://www.roblox.com/asset/?id=6022668888")
+
+tab:Label("Label")
+
+local changeclr = win:Tab("Change UI Color")
+
+changeclr:Colorpicker("Change UI Color",Color3.fromRGB(44, 120, 224), function(t)
+lib:ChangePresetColor(Color3.fromRGB(t.R * 255, t.G * 255, t.B * 255))
+end)
