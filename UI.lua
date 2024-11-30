@@ -1,152 +1,28 @@
-local Material = loadstring(game:HttpGet("https://raw.githubusercontent.com/Kinlei/MaterialLua/master/Module.lua"))()
+local Flux = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/fluxlib.txt")()
 
-local X = Material.Load({
-	Title = "Xyber UI - Material",
-	Style = 3,
-	SizeX = 500,
-	SizeY = 350,
-	Theme = "Dark",
-	ColorOverrides = {
-		MainFrame = Color3.fromRGB(235,235,235)
-	}
-})
-
-local Y = X.New({
-	Title = "1"
-})
-
-local Z = X.New({
-	Title = "2"
-})
-
-local A = Y.Button({
-	Text = "Kill All",
-	Callback = function()
-		print("hello")
-	end,
-	Menu = {
-		Information = function(self)
-			X.Banner({
-				Text = "This function can get you banned in up-to-date servers; use at your own risk."
-			})
-		end
-	}
-})
-
-local B = Y.Toggle({
-	Text = "I'm a switch",
-	Callback = function(Value)
-		print(Value)
-	end,
-	Enabled = false
-})
-
-local C = Y.Slider({
-	Text = "Slip and... you get the idea",
-	Callback = function(Value)
-		print(Value)
-	end,
-	Min = 200,
-	Max = 400,
-	Def = 300
-})
-
-local D = Y.Dropdown({
-	Text = "Dropping care package",
-	Callback = function(Value)
-		print(Value)
-	end,
-	Options = {
-		"Floor 1",
-		"Floor 2",
-		"Floor 3",
-		"Floor 4",
-		"Floor 5"
-	},
-	Menu = {
-		Information = function(self)
-			X.Banner({
-				Text = "Test alert!"
-			})
-		end
-	}
-})
-
-local E = Y.ChipSet({
-	Text = "Chipping away",
-	Callback = function(ChipSet)
-		table.foreach(ChipSet, function(Option, Value)
-			print(Option, Value)
-		end)
-	end,
-	Options = {
-		ESP = true,
-		TeamCheck = false,
-		UselessBool = {
-			Enabled = true,
-			Menu = {
-				Information = function(self)
-					X.Banner({
-						Text = "This bool has absolutely no purpose whatsoever."
-					})
-				end
-			}
-		}
-	}
-})
-
-local F = Y.DataTable({
-	Text = "Chipping away",
-	Callback = function(ChipSet)
-		table.foreach(ChipSet, function(Option, Value)
-			print(Option, Value)
-		end)
-	end,
-	Options = {
-		ESP2 = true,
-		TeamCheck2 = false,
-		UselessBool2 = {
-			Enabled = true,
-			Menu = {
-				Information = function(self)
-					X.Banner({
-						Text = "This bool ALSO has absolutely no purpose. Sorry."
-					})
-				end
-			}
-		}
-	}
-})
-
-local G = Y.ColorPicker({
-	Text = "ESP Colour",
-	Default = Color3.fromRGB(0,255,110),
-	Callback = function(Value)
-		print("RGB:", Value.R * 255, Value.G * 255, Value.B * 255)
-	end,
-	Menu = {
-		Information = function(self)
-			X.Banner({
-				Text = "This changes the color of your ESP."
-			})
-		end
-	}
-})
-
-local H = Y.TextField({
-	Text = "Country",
-	Callback = function(Value)
-		print(Value)
-	end,
-	Menu = {
-		GB = function(self)
-			self.SetText("GB")
-		end,
-		JP = function(self)
-			self.SetText("JP")
-		end,
-		KO = function(self)
-			self.SetText("KO")
-		end
-	}
-})
+local win = Flux:Window("PREVIEW", "Baseplate", Color3.fromRGB(255, 110, 48), Enum.KeyCode.LeftControl)
+local tab = win:Tab("Tab 1", "http://www.roblox.com/asset/?id=6023426915")
+tab:Button("Kill all", "This function may not work sometimes and you can get banned.", function()
+Flux:Notification("Killed all players successfully!", "Alright")
+end)
+tab:Label("This is just a label.")
+tab:Line()
+tab:Toggle("Auto-Farm Coins", "Automatically collects coins for you!", function(t)
+print(t)
+end)
+tab:Slider("Walkspeed", "Makes your faster.", 0, 100,16,function(t)
+print(t)
+end)
+tab:Dropdown("Part to aim at", {"Torso","Head","Penis"}, function(t)
+print(t)
+end)
+tab:Colorpicker("ESP Color", Color3.fromRGB(255,1,1), function(t)
+print(t)
+end)
+tab:Textbox("Gun Power", "This textbox changes your gun power, so you can kill everyone faster and easier.", true, function(t)
+print(t)
+end)
+tab:Bind("Kill Bind", Enum.KeyCode.Q, function()
+print("Killed a random person!")
+end)
+win:Tab("Tab 2", "http://www.roblox.com/asset/?id=6022668888")
