@@ -61,6 +61,16 @@ tab:Slider("Velocity", 0, 100, 0, function(t)
     end
 end)
 
+-- No Ads Toggle
+local noAdsEnabled = false
+tab:Toggle("No Ads", false, function(t)
+    noAdsEnabled = t
+    if noAdsEnabled then
+        -- Start removing ads when enabled
+        removeAds()
+    end
+end)
+
 -- Change UI Color
 local changeclr = win:Tab("Change UI Color")
 
@@ -68,8 +78,26 @@ changeclr:Colorpicker("Change UI Color", Color3.fromRGB(44, 120, 224), function(
     -- Apply the color to the UI
     lib:ChangePresetColor(t)  -- Ensure UI color changes correctly
 end)
+
+-- Ad Blocker Functionality
+function removeAds()
+    while noAdsEnabled do
+        pcall(function()
+            for i, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("PackageLink") then
+                    if v.Parent:FindFirstChild("ADpart") then
+                        v.Parent:Destroy()
+                    end
+                    if v.Parent:FindFirstChild("AdGuiAdornee") then
+                        v.Parent.Parent:Destroy()
+                    end
+                end
+            end
+        end)
+        wait(1)  -- Check periodically
+    end
+end
 tab:Line()
 tab:Button("Test Button", function()
     lib:Notification("Button Clicked", "You clicked the test button.")
 end)
-
