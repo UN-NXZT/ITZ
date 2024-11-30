@@ -3,7 +3,8 @@ local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scr
 local win = lib:Window("Xyber Hub - Natural Disaster", Color3.fromRGB(44, 120, 224), Enum.KeyCode.LeftControl)
 
 local tab = win:Tab("Main")
-local tab_ = win:Tab("Troll")
+local tab_ = win:Tab("Teleport")
+local _tab = win:Tab("Troll")
 
 tab:Label("This script is in beta, some functions may not work.")
 
@@ -44,7 +45,7 @@ tab:Slider("Walkspeed", 0, 500, 16, function(t)
 end)
 
 -- Player Velocity Slider
-tab:Slider("Velocity", 0, 100, 0, function(t)
+tab:Slider("Velocity", 0, 10, 0, function(t)
     local chr = game:GetService("Players").LocalPlayer.Character
     local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
     local connection
@@ -117,127 +118,39 @@ function stopRemovingAds()
 end
 
 -- Test Button
-tab:Button("Test Button", function()
-    lib:Notification("Button Clicked", "You clicked the test button.")
-end)
+tab_:Button("TP Tool", function()
+    local Tele = Instance.new("Tool")
+    Tele.RequiresHandle = false
+    Tele.Name = "TPTool"
+    Tele.ToolTip = "Teleport Tool"
+    Tele.Parent = game.Players.LocalPlayer.Backpack
 
--- Troll Section: Adding Only Fling Toggle
-tab_:Toggle("Fling", false, function(t)
-    if t then
-        -- Start Flinging the player
-        flingPlayer()
-    else
-        -- Stop Flinging the player
-        unflingPlayer()
-    end
-end)
+    local mouseConnection -- Variable to store the connection
 
--- Fling Player Function
-function flingPlayer()
-    local player = game:GetService("Players").LocalPlayer
-    local character = player.Character
-    if not character then return end
-    
-    flinging = true
-    -- Ensure no-clip mode to prevent clipping to the floor
-    setNoClip(true)
-
-    for _, child in pairs(character:GetDescendants()) do
-        if child:IsA("BasePart") then
-            child.CustomPhysicalProperties = PhysicalProperties.new(math.huge, 0.3, 0.5)  -- Make parts more flingable
-        end
-    end
-    
-    wait(.1)
-    local bambam = Instance.new("BodyAngularVelocity")
-    bambam.Name = randomString()
-    bambam.Parent = character.HumanoidRootPart
-    bambam.AngularVelocity = Vector3.new(0,99999,0)
-    bambam.MaxTorque = Vector3.new(0, math.huge, 0)
-    bambam.P = math.huge
-    
-    -- Prevent floor clipping by making sure root part is properly handled
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    if humanoidRootPart then
-        humanoidRootPart.CFrame = humanoidRootPart.CFrame + Vector3.new(0, 10, 0)  -- Lift the character above the floor
-    end
-
-    for _, part in pairs(character:GetChildren()) do
-        if part:IsA("BasePart") then
-            part.CanCollide = false
-            part.Massless = true
-            part.Velocity = Vector3.new(0, 0, 0)
-        end
-    end
-
-    local function flingDiedF()
-        unflingPlayer()
-    end
-    local humanoid = character:FindFirstChildOfClass('Humanoid')
-    if humanoid then
-        flingDied = humanoid.Died:Connect(flingDiedF)
-    end
-    
-    repeat
-        bambam.AngularVelocity = Vector3.new(0,99999,0)
-        wait(.2)
-        bambam.AngularVelocity = Vector3.new(0,0,0)
-        wait(.1)
-    until not flinging
-end
-
--- Unfling Player Function
-function unflingPlayer()
-    local player = game:GetService("Players").LocalPlayer
-    local character = player.Character
-    if not character then return end
-
-    setNoClip(false)  -- Disable no-clip mode
-    if flingDied then
-        flingDied:Disconnect()
-    end
-    flinging = false
-
-    wait(.1)
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    if humanoidRootPart then
-        for _, part in pairs(humanoidRootPart:GetChildren()) do
-            if part:IsA("BodyAngularVelocity") then
-                part:Destroy()
+    Tele.Equipped:Connect(function()
+        local Mouse = game.Players.LocalPlayer:GetMouse()
+        mouseConnection = Mouse.Button1Down:Connect(function()
+            if Mouse.Target then
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local rootPart = character:FindFirstChild("HumanoidRootPart")
+                if rootPart then
+                    rootPart.CFrame = CFrame.new(Mouse.Hit.p + Vector3.new(0, 5, 0))
+                end
             end
-        end
-    end
+        end)
+    end)
 
-    for _, child in pairs(character:GetDescendants()) do
-        if child:IsA("Part") or child:IsA("MeshPart") then
-            child.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.3, 0.5)  -- Reset physical properties
+    Tele.Unequipped:Connect(function()
+        -- Disconnect the connection when the tool is unequipped
+        if mouseConnection then
+            mouseConnection:Disconnect()
+            mouseConnection = nil
         end
-    end
-end
+    end)
+end)
 
--- Helper to set NoClip
-function setNoClip(enabled)
-    local character = game:GetService("Players").LocalPlayer.Character
-    if not character then return end
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        humanoid.PlatformStand = enabled  -- Prevent platform collisions
-    end
-    for _, part in pairs(character:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.CanCollide = not enabled  -- Toggle collisions
-        end
-    end
-end
 
--- Helper function for random string (used in BodyAngularVelocity)
-function randomString()
-    local charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    local length = 10
-    local result = ""
-    for i = 1, length do
-        local rand = math.random(1, #charset)
-        result = result .. charset:sub(rand, rand)
-    end
-    return result
-end
+_tab:Button("BlackHole Tool", function()
+        loadstring(game:HttpGet"https://raw.githubusercontent.com/ITZenon/ITZ/refs/heads/main/BlackHoleV3.lua")
+end)
