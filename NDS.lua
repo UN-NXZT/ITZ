@@ -162,7 +162,7 @@ tab_:Button("To Lobby", function()
     local character = player.Character or player.CharacterAdded:Wait()
     local rootPart = character:FindFirstChild("HumanoidRootPart")
     if rootPart then
-        rootPart.CFrame = CFrame.new(Vector3.new(-136, 47, 2))
+        rootPart.CFrame = CFrame.new(Vector3.new(-245, 194, 307)) 
     end
 end)
 
@@ -171,9 +171,10 @@ tab_:Button("To Map", function()
     local character = player.Character or player.CharacterAdded:Wait()
     local rootPart = character:FindFirstChild("HumanoidRootPart")
     if rootPart then
-        rootPart.CFrame = CFrame.new(Vector3.new(-245, 194, 307))
+        rootPart.CFrame = CFrame.new(Vector3.new(-136, 47, 2)) 
     end
 end)
+
 
 
 _tab:Button("Infinite Yield", function()
