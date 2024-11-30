@@ -4,7 +4,7 @@ local win = lib:Window("Xyber Hub - Natural Disaster", Color3.fromRGB(44, 120, 2
 
 local tab = win:Tab("Main")
 local tab_ = win:Tab("Teleport")
-local _tab = win:Tab("Troll")
+local _tab = win:Tab("Misc")
 
 tab:Label("This script is in beta, some functions may not work.")
 
@@ -45,21 +45,28 @@ tab:Slider("Walkspeed", 0, 500, 16, function(t)
 end)
 
 -- Player Velocity Slider
-tab:Slider("Velocity", 0, 10, 0, function(t)
-    local chr = game:GetService("Players").LocalPlayer.Character
-    local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
-    local connection
+local velocityConnection -- Variable to store the Heartbeat connection
 
-    if t > 0 and chr and hum and hum.Parent then
-        connection = game:GetService("RunService").Heartbeat:Connect(function(delta)
-            if hum.MoveDirection.Magnitude > 0 then
-                chr:TranslateBy(hum.MoveDirection * t * delta * 10)
-            end
-        end)
-    else
-        if connection then
-            connection:Disconnect()
-            connection = nil
+tab:Slider("Velocity", 0, 10, 0, function(t)
+    -- Disconnect existing connection if it exists
+    if velocityConnection then
+        velocityConnection:Disconnect()
+        velocityConnection = nil
+    end
+
+    -- If `t` is greater than 0, establish a new connection
+    if t > 0 then
+        local player = game:GetService("Players").LocalPlayer
+        local character = player.Character
+        local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+
+        if humanoid then
+            velocityConnection = game:GetService("RunService").Heartbeat:Connect(function(delta)
+                local moveDirection = humanoid.MoveDirection
+                if moveDirection.Magnitude > 0 then
+                    character:TranslateBy(moveDirection * t * delta * 10)
+                end
+            end)
         end
     end
 end)
@@ -150,7 +157,25 @@ tab_:Button("TP Tool", function()
     end)
 end)
 
+tab_:Button("To Lobby", function()
+    local player = game:GetService("Players").LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if rootPart then
+        rootPart.CFrame = CFrame.new(Vector3.new(-136, 47, 2))
+    end
+end)
 
-_tab:Button("BlackHole Tool", function()
-        loadstring(game:HttpGet"https://raw.githubusercontent.com/ITZenon/ITZ/refs/heads/main/BlackHoleV3.lua")
+tab_:Button("To Map", function()
+    local player = game:GetService("Players").LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if rootPart then
+        rootPart.CFrame = CFrame.new(Vector3.new(-245, 194, 307))
+    end
+end)
+
+
+_tab:Button("Infinite Yield", function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
 end)
