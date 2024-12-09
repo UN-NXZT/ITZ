@@ -1,6 +1,4 @@
-local module = {}
-
-function module.run(callback)
+local function run(callback)
     local function newname()
         local characters = "!#@$%^&*()_+{}[]:;<>?,./abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         local nameLength = math.random(8, 16)
@@ -17,8 +15,20 @@ function module.run(callback)
     while true do
         wait(1)
         local generatedName = newname()
-        callback(generatedName)
+        callback(generatedName) -- Pass the new name to the callback
     end
 end
 
-return module
+-- Usage Example:
+local Y = ""
+
+-- Start the random name generator
+run(function(newName)
+    Y = newName
+end)
+
+-- Print the generated names in a loop
+while true do
+    wait(1)
+    print(Y)
+end
