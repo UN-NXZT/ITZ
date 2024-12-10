@@ -1,3 +1,6 @@
+
+error("")
+
 --[[ Configuration ]]
 local Settings = {
     Box_Color = Color3.fromRGB(255, 0, 0),
