@@ -6,8 +6,13 @@ local Settings = {
     Box_Thickness = 1,
     Tracer_Origin = "Bottom", -- "Middle" or "Bottom"
     Tracer_FollowMouse = false,
-    Tracers = true
+    Tracers = true,
+    ShowHealthBar = true,
+    ShowName = true,
+    ShowDistance = true,
+    ShowHealth = true
 }
+
 local Team_Check = {
     TeamCheck = false,
     Green = Color3.fromRGB(0, 255, 0),
@@ -64,8 +69,15 @@ local function ESP(plr)
         black = NewQuad(Settings.Box_Thickness * 2, black),
         box = NewQuad(Settings.Box_Thickness, Settings.Box_Color),
         healthbar = NewLine(3, black),
-        greenhealth = NewLine(1.5, black)
+        greenhealth = NewLine(1.5, black),
+        name = Drawing.new("Text"),
+        distance = Drawing.new("Text"),
+        healthnum = Drawing.new("Text")
     }
+
+    library.name.Visible = false
+    library.distance.Visible = false
+    library.healthnum.Visible = false
 
     local function Colorize(color)
         for _, x in pairs(library) do
@@ -119,6 +131,46 @@ local function ESP(plr)
                             Colorize(plr.TeamColor.Color)
                         else
                             Colorize(Settings.Box_Color)
+                        end
+
+                        -- Display Health Bar
+                        if Settings.ShowHealthBar then
+                            local HealthHeight = (humanoid.Health / humanoid.MaxHealth) * 30
+                            library.healthbar.To = Vector2.new(HumPos.X + DistanceY + 5, HumPos.Y - DistanceY - HealthHeight)
+                            library.greenhealth.To = Vector2.new(HumPos.X + DistanceY + 5, HumPos.Y - DistanceY)
+                            library.healthbar.Visible = true
+                            library.greenhealth.Visible = true
+                        else
+                            library.healthbar.Visible = false
+                            library.greenhealth.Visible = false
+                        end
+
+                        -- Display Player Name
+                        if Settings.ShowName then
+                            library.name.Text = plr.Name
+                            library.name.Position = Vector2.new(HumPos.X, HumPos.Y - DistanceY - 20)
+                            library.name.Visible = true
+                        else
+                            library.name.Visible = false
+                        end
+
+                        -- Display Distance
+                        if Settings.ShowDistance then
+                            local distance = math.floor((player.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude)
+                            library.distance.Text = tostring(distance) .. " studs"
+                            library.distance.Position = Vector2.new(HumPos.X, HumPos.Y + DistanceY + 5)
+                            library.distance.Visible = true
+                        else
+                            library.distance.Visible = false
+                        end
+
+                        -- Display Health Number
+                        if Settings.ShowHealth then
+                            library.healthnum.Text = math.floor(humanoid.Health) .. "/" .. math.floor(humanoid.MaxHealth)
+                            library.healthnum.Position = Vector2.new(HumPos.X, HumPos.Y + DistanceY + 15)
+                            library.healthnum.Visible = true
+                        else
+                            library.healthnum.Visible = false
                         end
 
                         Visibility(true, library)
@@ -180,14 +232,13 @@ local Window = Fluent:CreateWindow({
 })
 
 local Tabs = {
-    Main = Window:AddTab({ Title = "Home", Icon = "home" }),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+    ESP = Window:AddTab({ Title = "ESP", Icon = "eye" })
 }
 
 local Options = Fluent.Options
 
 -- ESP Toggle
-local EspToggle = Tabs.Main:AddToggle("ESPEnabled", {
+local EspToggle = Tabs.ESP:AddToggle("ESPEnabled", {
     Title = "Enable ESP",
     Default = true,
     Callback = function(Value)
@@ -209,49 +260,98 @@ local EspToggle = Tabs.Main:AddToggle("ESPEnabled", {
     end
 })
 
--- ESP Color Customization
-local BoxColorPicker = Tabs.Settings:AddColorpicker("BoxColor", {
-    Title = "Box Color",
-    Default = Settings.Box_Color,
-    Callback = function(Color)
-        Settings.Box_Color = Color
-    end
-})
-
-local TracerColorPicker = Tabs.Settings:AddColorpicker("TracerColor", {
-    Title = "Tracer Color",
-    Default = Settings.Tracer_Color,
-    Callback = function(Color)
-        Settings.Tracer_Color = Color
-    end
-})
-
--- Tracer Settings
-Tabs.Settings:AddDropdown("TracerOrigin", {
-    Title = "Tracer Origin",
-    Values = {"Middle", "Bottom"},
-    Default = "Bottom",
+-- Team Check Toggle
+Tabs.ESP:AddToggle("TeamCheck", {
+    Title = "Enable Team Check",
+    Default = Team_Check.TeamCheck,
     Callback = function(Value)
-        Settings.Tracer_Origin = Value
+        Team_Check.TeamCheck = Value
+        -- Reload ESP after change
+        for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
+            if plr.Name ~= player.Name then
+                activePlayers[plr] = nil
+                ESP(plr)
+            end
+        end
     end
 })
 
-Tabs.Settings:AddSlider("TracerThickness", {
-    Title = "Tracer Thickness",
-    Min = 1,
-    Max = 5,
-    Default = Settings.Tracer_Thickness,
+-- Show Team Color Toggle
+Tabs.ESP:AddToggle("ShowTeamColor", {
+    Title = "Show Team Color",
+    Default = TeamColor,
     Callback = function(Value)
-        Settings.Tracer_Thickness = Value
+        TeamColor = Value
+        -- Reload ESP after change
+        for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
+            if plr.Name ~= player.Name then
+                activePlayers[plr] = nil
+                ESP(plr)
+            end
+        end
     end
 })
 
-Tabs.Settings:AddToggle("ShowTracers", {
-    Title = "Show Tracers",
-    Default = Settings.Tracers,
+-- Health Bar Toggle
+Tabs.ESP:AddToggle("ShowHealthBar", {
+    Title = "Show Health Bar",
+    Default = Settings.ShowHealthBar,
     Callback = function(Value)
-        Settings.Tracers = Value
+        Settings.ShowHealthBar = Value
+        -- Reload ESP after change
+        for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
+            if plr.Name ~= player.Name then
+                activePlayers[plr] = nil
+                ESP(plr)
+            end
+        end
     end
 })
 
---soon
+-- Name Toggle
+Tabs.ESP:AddToggle("ShowName", {
+    Title = "Show Player Name",
+    Default = Settings.ShowName,
+    Callback = function(Value)
+        Settings.ShowName = Value
+        -- Reload ESP after change
+        for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
+            if plr.Name ~= player.Name then
+                activePlayers[plr] = nil
+                ESP(plr)
+            end
+        end
+    end
+})
+
+-- Distance Toggle
+Tabs.ESP:AddToggle("ShowDistance", {
+    Title = "Show Distance",
+    Default = Settings.ShowDistance,
+    Callback = function(Value)
+        Settings.ShowDistance = Value
+        -- Reload ESP after change
+        for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
+            if plr.Name ~= player.Name then
+                activePlayers[plr] = nil
+                ESP(plr)
+            end
+        end
+    end
+})
+
+-- Health Number Toggle
+Tabs.ESP:AddToggle("ShowHealth", {
+    Title = "Show Health Number",
+    Default = Settings.ShowHealth,
+    Callback = function(Value)
+        Settings.ShowHealth = Value
+        -- Reload ESP after change
+        for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
+            if plr.Name ~= player.Name then
+                activePlayers[plr] = nil
+                ESP(plr)
+            end
+        end
+    end
+})
