@@ -1,24 +1,5 @@
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
-
-local Window = Fluent:CreateWindow({
-    Title = "Esp Libary",
-    SubTitle = "By Athex",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
-    Acrylic = true,
-    Theme = "Dark",
-    MinimizeKey = Enum.KeyCode.LeftControl
-})
-
-local Tabs = {
-    Main = Window:AddTab({ Title = "Main", Icon = "" }),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
-    ESP = Window:AddTab({ Title = "ESP", Icon = "eye" })
-}
-
-local ESPSettings = {
+--[[ Configuration ]]
+local Settings = {
     Box_Color = Color3.fromRGB(255, 0, 0),
     Tracer_Color = Color3.fromRGB(255, 0, 0),
     Tracer_Thickness = 1,
@@ -27,14 +8,17 @@ local ESPSettings = {
     Tracer_FollowMouse = false,
     Tracers = true
 }
-
 local Team_Check = {
     TeamCheck = false,
     Green = Color3.fromRGB(0, 255, 0),
     Red = Color3.fromRGB(255, 0, 0)
 }
-
 local TeamColor = true
+
+--[[ Main Script ]]
+local player = game:GetService("Players").LocalPlayer
+local camera = game:GetService("Workspace").CurrentCamera
+local mouse = player:GetMouse()
 local activePlayers = {} -- Tracks players with active ESP
 
 local function NewQuad(thickness, color)
@@ -75,10 +59,10 @@ local function ESP(plr)
     activePlayers[plr] = true
 
     local library = {
-        blacktracer = NewLine(ESPSettings.Tracer_Thickness * 2, black),
-        tracer = NewLine(ESPSettings.Tracer_Thickness, ESPSettings.Tracer_Color),
-        black = NewQuad(ESPSettings.Box_Thickness * 2, black),
-        box = NewQuad(ESPSettings.Box_Thickness, ESPSettings.Box_Color),
+        blacktracer = NewLine(Settings.Tracer_Thickness * 2, black),
+        tracer = NewLine(Settings.Tracer_Thickness, Settings.Tracer_Color),
+        black = NewQuad(Settings.Box_Thickness * 2, black),
+        box = NewQuad(Settings.Box_Thickness, Settings.Box_Color),
         healthbar = NewLine(3, black),
         greenhealth = NewLine(1.5, black)
     }
@@ -109,15 +93,15 @@ local function ESP(plr)
                         Size(library.box)
                         Size(library.black)
 
-                        if ESPSettings.Tracers then
-                            if ESPSettings.Tracer_Origin == "Middle" then
+                        if Settings.Tracers then
+                            if Settings.Tracer_Origin == "Middle" then
                                 library.tracer.From = camera.ViewportSize * 0.5
                                 library.blacktracer.From = camera.ViewportSize * 0.5
-                            elseif ESPSettings.Tracer_Origin == "Bottom" then
+                            elseif Settings.Tracer_Origin == "Bottom" then
                                 library.tracer.From = Vector2.new(camera.ViewportSize.X * 0.5, camera.ViewportSize.Y)
                                 library.blacktracer.From = Vector2.new(camera.ViewportSize.X * 0.5, camera.ViewportSize.Y)
                             end
-                            if ESPSettings.Tracer_FollowMouse then
+                            if Settings.Tracer_FollowMouse then
                                 library.tracer.From = Vector2.new(mouse.X, mouse.Y + 36)
                                 library.blacktracer.From = Vector2.new(mouse.X, mouse.Y + 36)
                             end
@@ -134,7 +118,7 @@ local function ESP(plr)
                         elseif TeamColor then
                             Colorize(plr.TeamColor.Color)
                         else
-                            Colorize(ESPSettings.Box_Color)
+                            Colorize(Settings.Box_Color)
                         end
 
                         Visibility(true, library)
@@ -169,103 +153,105 @@ game:GetService("Players").PlayerAdded:Connect(function(newplr)
     end
 end)
 
--- ESP Settings UI
-Tabs.ESP:AddButton({
-    Title = "Toggle ESP",
-    Description = "Enable or disable the ESP",
-    Callback = function()
-        if next(activePlayers) then
-            for plr in pairs(activePlayers) do
+-- Periodic ESP Reset
+task.spawn(function()
+    while task.wait(10) do
+        for plr in pairs(activePlayers) do
+            if not game:GetService("Players"):FindFirstChild(plr.Name) then
                 activePlayers[plr] = nil
-                Visibility(false, {library.box, library.tracer, library.blacktracer, library.healthbar, library.greenhealth})
+            end
+        end
+    end
+end)
+
+--[[ Fluent UI Setup ]]
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Fluent " .. Fluent.Version,
+    SubTitle = "by dawid",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+local Tabs = {
+    Main = Window:AddTab({ Title = "Home", Icon = "home" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+
+local Options = Fluent.Options
+
+-- ESP Toggle
+local EspToggle = Tabs.Main:AddToggle("ESPEnabled", {
+    Title = "Enable ESP",
+    Default = true,
+    Callback = function(Value)
+        if Value then
+            -- Enable ESP
+            for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
+                if plr.Name ~= player.Name then
+                    ESP(plr)
+                end
             end
         else
-            for _, v in pairs(game:GetService("Players"):GetPlayers()) do
-                if v.Name ~= player.Name then
-                    ESP(v)
+            -- Disable ESP
+            for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
+                if plr.Name ~= player.Name then
+                    activePlayers[plr] = nil
                 end
             end
         end
     end
 })
 
-Tabs.ESP:AddColorpicker("BoxColor", {
+-- ESP Color Customization
+local BoxColorPicker = Tabs.Settings:AddColorpicker("BoxColor", {
     Title = "Box Color",
-    Default = ESPSettings.Box_Color,
+    Default = Settings.Box_Color,
     Callback = function(Color)
-        ESPSettings.Box_Color = Color
-        for _, library in pairs(activePlayers) do
-            library.box.Color = Color
-        end
+        Settings.Box_Color = Color
     end
 })
 
-Tabs.ESP:AddColorpicker("TracerColor", {
+local TracerColorPicker = Tabs.Settings:AddColorpicker("TracerColor", {
     Title = "Tracer Color",
-    Default = ESPSettings.Tracer_Color,
+    Default = Settings.Tracer_Color,
     Callback = function(Color)
-        ESPSettings.Tracer_Color = Color
-        for _, library in pairs(activePlayers) do
-            library.tracer.Color = Color
-            library.blacktracer.Color = Color
-        end
+        Settings.Tracer_Color = Color
     end
 })
 
-Tabs.ESP:AddSlider("BoxThickness", {
-    Title = "Box Thickness",
-    Min = 1,
-    Max = 5,
-    Default = ESPSettings.Box_Thickness,
+-- Tracer Settings
+Tabs.Settings:AddDropdown("TracerOrigin", {
+    Title = "Tracer Origin",
+    Values = {"Middle", "Bottom"},
+    Default = "Bottom",
     Callback = function(Value)
-        ESPSettings.Box_Thickness = Value
+        Settings.Tracer_Origin = Value
     end
 })
 
-Tabs.ESP:AddSlider("TracerThickness", {
+Tabs.Settings:AddSlider("TracerThickness", {
     Title = "Tracer Thickness",
     Min = 1,
     Max = 5,
-    Default = ESPSettings.Tracer_Thickness,
+    Default = Settings.Tracer_Thickness,
     Callback = function(Value)
-        ESPSettings.Tracer_Thickness = Value
+        Settings.Tracer_Thickness = Value
     end
 })
 
-Tabs.ESP:AddToggle("Tracers", {
-    Title = "Enable Tracers",
-    Default = ESPSettings.Tracers,
+Tabs.Settings:AddToggle("ShowTracers", {
+    Title = "Show Tracers",
+    Default = Settings.Tracers,
     Callback = function(Value)
-        ESPSettings.Tracers = Value
+        Settings.Tracers = Value
     end
 })
 
-Tabs.ESP:AddDropdown("TracerOrigin", {
-    Title = "Tracer Origin",
-    Values = {"Middle", "Bottom"},
-    Default = ESPSettings.Tracer_Origin,
-    Callback = function(Value)
-        ESPSettings.Tracer_Origin = Value
-    end
-})
-
-Tabs.ESP:AddToggle("FollowMouse", {
-    Title = "Tracer Follow Mouse",
-    Default = ESPSettings.Tracer_FollowMouse,
-    Callback = function(Value)
-        ESPSettings.Tracer_FollowMouse = Value
-    end
-})
-
-SaveManager:SetLibrary(Fluent)
-InterfaceManager:SetLibrary(Fluent)
-SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes({})
-InterfaceManager:SetFolder("FluentScriptHub")
-SaveManager:SetFolder("FluentScriptHub/specific-game")
-InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-SaveManager:BuildConfigSection(Tabs.Settings)
-
-Window:SelectTab(1)
-
-SaveManager:LoadAutoloadConfig()
+--soon
