@@ -260,13 +260,12 @@ local EspToggle = Tabs.ESP:AddToggle("ESPEnabled", {
     end
 })
 
--- Team Check Toggle
-Tabs.ESP:AddToggle("TeamCheck", {
-    Title = "Enable Team Check",
-    Default = Team_Check.TeamCheck,
-    Callback = function(Value)
-        Team_Check.TeamCheck = Value
-        -- Reload ESP after change
+-- Reload Button
+Tabs.ESP:AddButton({
+    Title = "Reload Script",
+    Description = "Reloads the ESP script.",
+    Callback = function()
+        -- Re-execute the ESP function for all players
         for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
             if plr.Name ~= player.Name then
                 activePlayers[plr] = nil
@@ -276,13 +275,12 @@ Tabs.ESP:AddToggle("TeamCheck", {
     end
 })
 
--- Show Team Color Toggle
-Tabs.ESP:AddToggle("ShowTeamColor", {
-    Title = "Show Team Color",
-    Default = TeamColor,
-    Callback = function(Value)
-        TeamColor = Value
-        -- Reload ESP after change
+-- Box Color Change
+Tabs.ESP:AddColorpicker("BoxColor", {
+    Title = "Box Color",
+    Default = Settings.Box_Color,
+    Callback = function(color)
+        Settings.Box_Color = color
         for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
             if plr.Name ~= player.Name then
                 activePlayers[plr] = nil
@@ -292,61 +290,12 @@ Tabs.ESP:AddToggle("ShowTeamColor", {
     end
 })
 
--- Health Bar Toggle
-Tabs.ESP:AddToggle("ShowHealthBar", {
-    Title = "Show Health Bar",
-    Default = Settings.ShowHealthBar,
-    Callback = function(Value)
-        Settings.ShowHealthBar = Value
-        -- Reload ESP after change
-        for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
-            if plr.Name ~= player.Name then
-                activePlayers[plr] = nil
-                ESP(plr)
-            end
-        end
-    end
-})
-
--- Name Toggle
-Tabs.ESP:AddToggle("ShowName", {
-    Title = "Show Player Name",
-    Default = Settings.ShowName,
-    Callback = function(Value)
-        Settings.ShowName = Value
-        -- Reload ESP after change
-        for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
-            if plr.Name ~= player.Name then
-                activePlayers[plr] = nil
-                ESP(plr)
-            end
-        end
-    end
-})
-
--- Distance Toggle
-Tabs.ESP:AddToggle("ShowDistance", {
-    Title = "Show Distance",
-    Default = Settings.ShowDistance,
-    Callback = function(Value)
-        Settings.ShowDistance = Value
-        -- Reload ESP after change
-        for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
-            if plr.Name ~= player.Name then
-                activePlayers[plr] = nil
-                ESP(plr)
-            end
-        end
-    end
-})
-
--- Health Number Toggle
-Tabs.ESP:AddToggle("ShowHealth", {
-    Title = "Show Health Number",
-    Default = Settings.ShowHealth,
-    Callback = function(Value)
-        Settings.ShowHealth = Value
-        -- Reload ESP after change
+-- Tracer Color Change
+Tabs.ESP:AddColorpicker("TracerColor", {
+    Title = "Tracer Color",
+    Default = Settings.Tracer_Color,
+    Callback = function(color)
+        Settings.Tracer_Color = color
         for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
             if plr.Name ~= player.Name then
                 activePlayers[plr] = nil
