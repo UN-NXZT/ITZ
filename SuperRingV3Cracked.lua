@@ -314,37 +314,3 @@ IncreaseRadius.MouseButton1Click:Connect(function()
     RadiusDisplay.Text = "Radius: " .. radius
     playSound("12221967")
 end)
-
--- Notifications
-StarterGui:SetCore("SendNotification", {
-    Title = "Join me Discord !",
-    Text = "For More Op Scripts !",
-    Duration = 5
-})
-
--- Get player thumbnail
-local userId = Players:GetUserIdFromNameAsync("NannaDev")
-local thumbType = Enum.ThumbnailType.HeadShot
-local thumbSize = Enum.ThumbnailSize.Size420x420
-local content, isReady = Players:GetUserThumbnailAsync(userId, thumbType, thumbSize)
-
-StarterGui:SetCore("SendNotification", {
-    Title = "Enjoy Super Ring [V3]",
-    Text = "Cracked By .gg/3kZ7dKbJPe",
-    Icon = content,
-    Duration = 5
-})
-
--- Chat message (Updated for new chat system)
-local function SendChatMessage(message)
-    if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
-        local textChannel = TextChatService.TextChannels.RBXGeneral
-        textChannel:SendAsync(message)
-    else
-        game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(message, "All")
-    end
-end
-
--- Send the chat message
-SendChatMessage("Super Ring Parts Cracked By Projeto LKB Executed! ✨")
-SendChatMessage("Hey Yumm Original Creator Script ChatGpt Is Fire 🔥🔥🔥")
