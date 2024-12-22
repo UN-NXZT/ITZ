@@ -13,10 +13,10 @@ end
 local promptsFound = findProximityPrompts(customDirectory)
 
 for _, prompt in ipairs(promptsFound) do
-    print("Found ProximityPrompt:", prompt.Name, "Parent:", prompt.Parent.Name)
+    print("Found ProximityPrompt:", prompt:GetFullName())
 
     prompt.Triggered:Connect(function(player)
-        print(player.Name, "triggered the ProximityPrompt:", prompt.Name)
+        print(player.Name, "triggered the ProximityPrompt:", prompt:GetFullName())
     end)
 end
 
