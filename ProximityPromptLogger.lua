@@ -16,8 +16,8 @@ for _, prompt in ipairs(promptsFound) do
     print("Found ProximityPrompt:", prompt:GetFullName())
 
     prompt.Triggered:Connect(function(player)
-        print(player.Name, "triggered the ProximityPrompt:", prompt:GetFullName())
+        print("triggered the ProximityPrompt:", prompt:GetFullName())
     end)
 end
 
-print("Total ProximityPrompts found:", #promptsFound)
+--print("Total ProximityPrompts found:", #promptsFound)
